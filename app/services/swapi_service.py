@@ -1,15 +1,14 @@
 
 import httpx
 
-SWAPI_URL = 'https://swapi.dev/api/'
+from app.config import settings
 
 
 class SwapiService:
-    async def fetch(self, endpoint: str = ''):
+    async def fetch(self):
         try:
             async with httpx.AsyncClient() as client:
-                url = f"{SWAPI_URL}{endpoint}/"
-                response = await client.get(url)
+                response = await client.get(settings.SWAPI_BASE_URL)
                 response.raise_for_status()
                 return response.json()
         except httpx.HTTPStatusError as exc:
