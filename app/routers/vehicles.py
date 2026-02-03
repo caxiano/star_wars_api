@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Query
 
-from app.core.auth import verify_token
+from app.core.auth import get_current_user
+from app.schemas.user import User
 from app.services.swapi_client import SwapiClient
 
 router = APIRouter()
@@ -12,7 +13,8 @@ async def list_vehicles(
     name: str | None = Query(None),
     vehicle_class: str | None = Query(None),
     sort: str = Query("name"),
-    _: bool = Depends(verify_token)
+
+
 ):
     data = await client.fetch("vehicles", params={"search": name} if name else None)
     results = data["results"]
@@ -40,4 +42,15 @@ async def vehicle_films(vehicle_id: int):
     return {
         "vehicle": vehicle["name"],
         "films": films
+    }
+
+
+@router.get("/{vehicle_id}/pilots")
+async def vehicle_pilots(vehicle_id: int):
+    vehicle = await client.fetch(f"vehicles/{vehicle_id}")
+    pilots = [await client.fetch(url) for url in vehicle["pilots"]]
+
+    return {
+        "vehicle": vehicle["name"],
+        "pilots": pilots
     }

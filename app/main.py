@@ -6,20 +6,21 @@ from app.routers import (auth, films, people, planets, species, starships,
 
 app = FastAPI(
     title="🌌 Star Wars Explorer 🌌",
+    summary="Explore o universo de Star Wars com dados da SWAPI",
+    description=f"""
+        Uma API interativa para explorar o universo de Star Wars usando dados da SWAPI (Star Wars API).
+        Esta API permite ao usuário acessar informações sobre personagens, planetas, espaçonaves, veículos, espécies e filmes da franquia Star Wars.
+        É construída com FastAPI e fornece autenticação baseada em JWT para acesso seguro aos endpoints.""",
+    version="1.0.0",
     contact={
         "name": "Cassiano Shigueyuki Nishikawa",
         "email": "csnishikawa@gmail.com",
         "url": "https://github.com/caxiano/starwars-api",
 
     },
-    description=f"""
-        An interactive API to explore the Star Wars universe using data from the SWAPI (Star Wars API).
-        This API allows users to access information about characters, planets, starships, vehicles, species, and films from the Star Wars franchise.
-        It is built with FastAPI and provides JWT-based authentication for secure access to the endpoints.""",
-    version="1.0.0",
 )
 
-app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+app.include_router(auth.router, prefix="/auth", tags=["Autenticação"])
 app.include_router(people.router, prefix="/people",
                    tags=["Pessoas"], dependencies=[Depends(get_current_user)])
 app.include_router(planets.router, prefix="/planets",

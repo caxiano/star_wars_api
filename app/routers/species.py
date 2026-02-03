@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, Query
 
-from app.core.auth import verify_token
 from app.services.swapi_client import SwapiClient
 
 router = APIRouter()
@@ -12,7 +11,6 @@ async def list_species(
     name: str | None = Query(None),
     classification: str | None = Query(None),
     sort: str = Query("name"),
-    _: bool = Depends(verify_token)
 ):
     data = await client.fetch("species", params={"search": name} if name else None)
     results = data["results"]
@@ -40,4 +38,15 @@ async def species_people(species_id: int):
     return {
         "species": species["name"],
         "people": people
+    }
+
+
+@router.get("/{species_id}/films")
+async def species_films(species_id: int):
+    species = await client.fetch(f"species/{species_id}")
+    films = [await client.fetch(url) for url in species["films"]]
+
+    return {
+        "species": species["name"],
+        "films": films
     }

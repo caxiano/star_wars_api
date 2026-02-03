@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Query
 
-from app.core.auth import verify_token
+from app.core.auth import get_current_user
+from app.schemas.user import User
 from app.services.swapi_client import SwapiClient
 
 router = APIRouter()
@@ -12,7 +13,8 @@ async def list_planets(
     name: str | None = Query(None),
     climate: str | None = Query(None),
     sort: str = Query("name"),
-    _: bool = Depends(verify_token)
+
+
 ):
     data = await client.fetch("planets", params={"search": name} if name else None)
     results = data["results"]
@@ -40,4 +42,15 @@ async def planet_residents(planet_id: int):
     return {
         "planet": planet["name"],
         "residents": residents
+    }
+
+
+@router.get("/{planet_id}/films")
+async def planet_films(planet_id: int):
+    planet = await client.fetch(f"planets/{planet_id}")
+    films = [await client.fetch(url) for url in planet["films"]]
+
+    return {
+        "planet": planet["name"],
+        "films": films
     }
