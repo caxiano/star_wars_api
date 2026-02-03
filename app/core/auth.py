@@ -1,17 +1,31 @@
 import jwt
-from fastapi import Header, HTTPException
+from fastapi import Depends, HTTPException
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.config import settings
+from app.schemas.user import User
+
+security = HTTPBearer()
 
 
-def verify_token(authorization: str = Header(...)):
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+) -> User:
+    token = credentials.credentials
+
     try:
-        token = authorization.replace("Bearer ", "")
-        jwt.decode(
+        payload = jwt.decode(
             token,
             settings.JWT_SECRET_KEY,
             algorithms=[settings.JWT_ALGORITHM]
         )
-        return True
-    except Exception:
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    return User(
+        id=payload["id"],
+        email=payload["email"],
+        role=payload.get("role", "user"),
+    )
