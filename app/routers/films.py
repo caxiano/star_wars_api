@@ -18,6 +18,7 @@ async def list_films(
         results = [f for f in results if title.lower() in f["title"].lower()]
 
     results.sort(key=lambda x: x.get(sort))
+
     return {"count": len(results), "results": results}
 
 
@@ -29,18 +30,15 @@ async def get_film(film_id: int):
 @router.get("/{film_id}/characters")
 async def film_characters(film_id: int):
     film = await client.fetch(f"films/{film_id}")
-    characters = [await client.fetch(url) for url in film["characters"]]
+    characters = await client.fetch_many(film["characters"])
 
-    return {
-        "film": film["title"],
-        "characters": characters
-    }
+    return {"film": film["title"], "characters": characters}
 
 
 @router.get("/{film_id}/planets")
 async def film_planets(film_id: int):
     film = await client.fetch(f"films/{film_id}")
-    planets = [await client.fetch(url) for url in film["planets"]]
+    planets = await client.fetch_many(film["planets"])
 
     return {"film": film["title"], "planets": planets}
 
@@ -48,7 +46,7 @@ async def film_planets(film_id: int):
 @router.get("/{film_id}/species")
 async def film_species(film_id: int):
     film = await client.fetch(f"films/{film_id}")
-    species = [await client.fetch(url) for url in film["species"]]
+    species = await client.fetch_many(film["species"])
 
     return {"film": film["title"], "species": species}
 
@@ -56,7 +54,7 @@ async def film_species(film_id: int):
 @router.get("/{film_id}/starships")
 async def film_starships(film_id: int):
     film = await client.fetch(f"films/{film_id}")
-    starships = [await client.fetch(url) for url in film["starships"]]
+    starships = await client.fetch_many(film["starships"])
 
     return {"film": film["title"], "starships": starships}
 
@@ -64,6 +62,6 @@ async def film_starships(film_id: int):
 @router.get("/{film_id}/vehicles")
 async def film_vehicles(film_id: int):
     film = await client.fetch(f"films/{film_id}")
-    vehicles = [await client.fetch(url) for url in film["vehicles"]]
+    vehicles = await client.fetch_many(film["vehicles"])
 
     return {"film": film["title"], "vehicles": vehicles}

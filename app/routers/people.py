@@ -27,42 +27,30 @@ async def get_person(person_id: int):
 @router.get("/{person_id}/films")
 async def person_films(person_id: int):
     person = await client.fetch(f"people/{person_id}")
-    films = [await client.fetch(url) for url in person["films"]]
+    films = await client.fetch_many(person["films"])
 
-    return {
-        "person": person["name"],
-        "films": films
-    }
+    return {"person": person["name"], "films": films}
 
 
 @router.get("/{person_id}/species")
 async def person_species(person_id: int):
     person = await client.fetch(f"people/{person_id}")
-    species = [await client.fetch(url) for url in person["species"]]
+    species = await client.fetch_many(person["species"])
 
-    return {
-        "person": person["name"],
-        "species": species
-    }
+    return {"person": person["name"], "species": species}
 
 
 @router.get("/{person_id}/starships")
 async def person_starships(person_id: int):
     person = await client.fetch(f"people/{person_id}")
-    starships = [await client.fetch(url) for url in person["starships"]]
+    starships = await client.fetch_many(person["starships"])
 
-    return {
-        "person": person["name"],
-        "starships": starships
-    }
+    return {"person": person["name"], "starships": starships}
 
 
 @router.get("/{person_id}/vehicles")
 async def person_vehicles(person_id: int):
     person = await client.fetch(f"people/{person_id}")
-    vehicles = [await client.fetch(url) for url in person["vehicles"]]
+    vehicles = await client.fetch_many(person["vehicles"])
 
-    return {
-        "person": person["name"],
-        "vehicles": vehicles
-    }
+    return {"person": person["name"], "vehicles": vehicles}

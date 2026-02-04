@@ -1,7 +1,5 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Query
 
-from app.core.auth import get_current_user
-from app.schemas.user import User
 from app.services.swapi_client import SwapiClient
 
 router = APIRouter()
@@ -13,8 +11,6 @@ async def list_vehicles(
     name: str | None = Query(None),
     vehicle_class: str | None = Query(None),
     sort: str = Query("name"),
-
-
 ):
     data = await client.fetch("vehicles", params={"search": name} if name else None)
     results = data["results"]
@@ -26,6 +22,7 @@ async def list_vehicles(
         ]
 
     results.sort(key=lambda x: x.get(sort, ""))
+
     return {"count": len(results), "results": results}
 
 
@@ -37,20 +34,14 @@ async def get_vehicle(vehicle_id: int):
 @router.get("/{vehicle_id}/films")
 async def vehicle_films(vehicle_id: int):
     vehicle = await client.fetch(f"vehicles/{vehicle_id}")
-    films = [await client.fetch(url) for url in vehicle["films"]]
+    films = await client.fetch_many(vehicle["films"])
 
-    return {
-        "vehicle": vehicle["name"],
-        "films": films
-    }
+    return {"vehicle": vehicle["name"], "films": films}
 
 
 @router.get("/{vehicle_id}/pilots")
 async def vehicle_pilots(vehicle_id: int):
     vehicle = await client.fetch(f"vehicles/{vehicle_id}")
-    pilots = [await client.fetch(url) for url in vehicle["pilots"]]
+    pilots = await client.fetch_many(vehicle["pilots"])
 
-    return {
-        "vehicle": vehicle["name"],
-        "pilots": pilots
-    }
+    return {"vehicle": vehicle["name"], "pilots": pilots}

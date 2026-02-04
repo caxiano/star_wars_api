@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Query
 
 from app.services.swapi_client import SwapiClient
 
@@ -13,6 +13,7 @@ async def list_species(
     sort: str = Query("name"),
 ):
     data = await client.fetch("species", params={"search": name} if name else None)
+
     results = data["results"]
 
     if classification:
@@ -22,6 +23,7 @@ async def list_species(
         ]
 
     results.sort(key=lambda x: x.get(sort, ""))
+
     return {"count": len(results), "results": results}
 
 
@@ -33,20 +35,14 @@ async def get_species(species_id: int):
 @router.get("/{species_id}/people")
 async def species_people(species_id: int):
     species = await client.fetch(f"species/{species_id}")
-    people = [await client.fetch(url) for url in species["people"]]
+    people = await client.fetch_many(species["people"])
 
-    return {
-        "species": species["name"],
-        "people": people
-    }
+    return {"species": species["name"], "people": people}
 
 
 @router.get("/{species_id}/films")
 async def species_films(species_id: int):
     species = await client.fetch(f"species/{species_id}")
-    films = [await client.fetch(url) for url in species["films"]]
+    films = await client.fetch_many(species["films"])
 
-    return {
-        "species": species["name"],
-        "films": films
-    }
+    return {"species": species["name"], "films": films}

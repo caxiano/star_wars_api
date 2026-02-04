@@ -1,7 +1,5 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Query
 
-from app.core.auth import get_current_user
-from app.schemas.user import User
 from app.services.swapi_client import SwapiClient
 
 router = APIRouter()
@@ -26,6 +24,7 @@ async def list_starships(
         ]
 
     results.sort(key=lambda x: x.get(sort, ""))
+
     return {"count": len(results), "results": results}
 
 
@@ -37,20 +36,14 @@ async def get_starship(starship_id: int):
 @router.get("/{starship_id}/films")
 async def starship_films(starship_id: int):
     starship = await client.fetch(f"starships/{starship_id}")
-    films = [await client.fetch(url) for url in starship["films"]]
+    films = await client.fetch_many(starship["films"])
 
-    return {
-        "starship": starship["name"],
-        "films": films
-    }
+    return {"starship": starship["name"], "films": films}
 
 
 @router.get("/{starship_id}/pilots")
 async def starship_pilots(starship_id: int):
     starship = await client.fetch(f"starships/{starship_id}")
-    pilots = [await client.fetch(url) for url in starship["pilots"]]
+    pilots = await client.fetch_many(starship["pilots"])
 
-    return {
-        "starship": starship["name"],
-        "pilots": pilots
-    }
+    return {"starship": starship["name"], "pilots": pilots}

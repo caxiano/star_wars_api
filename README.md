@@ -1,10 +1,18 @@
 # 🌌 Star Wars Interactive API
 
-Uma API backend interativa construída com **FastAPI**, que permite aos usuários explorar o universo de **Star Wars** através de perguntas em linguagem natural. O projeto consome dados da [SWAPI](https://swapi.dev/) e retorna respostas estruturadas, legíveis e correlacionadas, indo além de simples links.
+Uma API backend interativa construída com **FastAPI**, que permite aos usuários explorar o universo de **Star Wars** através de perguntas em linguagem natural. O projeto consome dados da [SWAPI](https://swapi.dev/) e retorna respostas estruturadas, legíveis e correlacionadas.
 
 Este projeto foi desenvolvido como **case técnico** para o processo seletivo de **Desenvolvedor Back End Python Júnior**.
 
 ---
+
+## Melhorias Futuras
+
+- Persistência de dados em SQLite ou PostgreSQL para otimizar consultas relacionais
+- Cache distribuído
+
+---
+
 ## 👨‍💻 Autor
 
 **Cassiano Shigueyuki Nishikawa**\
