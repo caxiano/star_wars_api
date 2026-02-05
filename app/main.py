@@ -1,4 +1,5 @@
 from fastapi import Depends, FastAPI
+from fastapi.responses import RedirectResponse
 
 from app.core.auth import get_current_user
 from app.lifespan import lifespan
@@ -64,3 +65,11 @@ app.include_router(starships.router, prefix="/api/starships",
                    tags=["🚀 Espaçonaves"], dependencies=[Depends(get_current_user)])
 app.include_router(vehicles.router, prefix="/api/vehicles",
                    tags=["🚗 Veículos"], dependencies=[Depends(get_current_user)])
+
+
+@app.get("/", include_in_schema=False)
+def root():
+    """
+    Redireciona a raiz do site para a documentação interativa (/docs).
+    """
+    return RedirectResponse(url="/docs")

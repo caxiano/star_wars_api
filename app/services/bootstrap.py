@@ -1,3 +1,5 @@
+import asyncio
+
 from app.mappers.films_mapper import normalize_films
 from app.mappers.people_mapper import normalize_people
 from app.mappers.planets_mapper import normalize_planets
@@ -23,15 +25,13 @@ async def bootstrap_data() -> None:
     """
 
     # =========================
-    # 1. INGESTÃO DOS DADOS
+    # 1. INGESTÃO DOS DADOS (paralela)
     # =========================
 
-    raw_people = await fetch_all_pages("people")
-    raw_films = await fetch_all_pages("films")
-    raw_planets = await fetch_all_pages("planets")
-    raw_species = await fetch_all_pages("species")
-    raw_starships = await fetch_all_pages("starships")
-    raw_vehicles = await fetch_all_pages("vehicles")
+    resources = ["people", "films", "planets",
+                 "species", "starships", "vehicles"]
+    fetchers = [fetch_all_pages(r) for r in resources]
+    raw_people, raw_films, raw_planets, raw_species, raw_starships, raw_vehicles = await asyncio.gather(*fetchers)
 
     # =========================
     # 2. CRIAÇÃO DOS ÍNDICES
