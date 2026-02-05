@@ -1,23 +1,58 @@
-# 🌌 Star Wars Interactive API
+# 🌌 Star Wars Explorer API 🌌
 
-Uma API backend interativa construída com **FastAPI**, que permite aos usuários explorar o universo de **Star Wars** através de perguntas em linguagem natural. O projeto consome dados da [SWAPI](https://swapi.dev/) e retorna respostas estruturadas, legíveis e correlacionadas.
+Uma API backend construída com **FastAPI** que permite explorar o
+universo de **Star Wars** de forma simples, rápida e organizada 🚀
 
-Este projeto foi desenvolvido como **case técnico** para o processo seletivo de **Desenvolvedor Back End Python Júnior**.
+Os dados são obtidos da **[SWAPI(https://swapi.dev/)](https://swapi.dev/)**, depois
+**normalizados**, **correlacionados** e disponibilizados por meio de
+endpoints REST seguros, com autenticação via **JWT**.
+
+Este projeto foi desenvolvido como **case técnico** para a vaga de
+**Desenvolvedor Back End Python**.
 
 ---
 
-## Normalização de Dados
+## 🧭 Visão Geral
 
-Os dados provenientes da SWAPI utilizam URLs para representar relações
-entre recursos. Durante o processo de bootstrap da aplicação, todos os
-recursos são ingeridos e indexados em memória, permitindo a conversão
-dessas relações em estruturas mais legíveis para o consumidor da API,
-no formato:
+A **Star Wars Explorer API** permite explorar:
 
-{ "Nome do Recurso": "link interno da API" }
+-   👤 Pessoas
+-   🎬 Filmes
+-   🪐 Planetas
+-   🧬 Espécies
+-   🚀 Espaçonaves
+-   🚗 Veículos
 
-Essa abordagem evita chamadas adicionais à SWAPI e melhora a experiência
-de consumo da API.
+Todos os recursos retornam **relações navegáveis**, utilizando **links
+internos da própria API**, tornando a exploração dos dados simples e
+intuitiva.
+
+---
+
+## 🧠 Normalização de Dados
+
+A SWAPI representa relações utilizando URLs.\
+Durante o processo de bootstrap da aplicação, essas relações são
+resolvidas e convertidas para um formato mais amigável ao consumidor da
+API.
+
+### Exemplo
+
+**Antes (SWAPI):**
+
+``` json
+"characters": [
+  "https://swapi.dev/api/people/1/"
+]
+```
+
+**Depois (Star Wars Explorer API):**
+
+``` json
+"characters": {
+  "Luke Skywalker": "http://localhost:8000/people/1"
+}
+```
 
 ---
 

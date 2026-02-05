@@ -1,48 +1,50 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException
 
-from app.services.swapi_client import SwapiClient
+from app.services.json_store import load_json
 
 router = APIRouter()
-client = SwapiClient()
 
 
 @router.get("/")
-async def list_planets(
-    name: str | None = Query(None),
-    climate: str | None = Query(None),
-    sort: str = Query("name"),
-):
-    data = await client.fetch("planets", params={"search": name} if name else None)
+def list_planets():
+    """
+    Retorna a lista de planetas.
+    """
+    data = load_json("planets")
 
-    results = data["results"]
+    if not data:
+        raise HTTPException(500, "Planets data not available")
 
-    if climate:
-        results = [
-            p for p in results
-            if climate.lower() in p.get("climate", "").lower()
-        ]
-
-    results.sort(key=lambda x: x.get(sort, ""))
-
-    return {"count": len(results), "results": results}
+    return {"count": len(data), "results": data}
 
 
 @router.get("/{planet_id}")
-async def get_planet(planet_id: int):
-    return await client.fetch(f"planets/{planet_id}")
+def get_planet(planet_id: int):
+    """
+    Retorna um planeta pelo ID.
+    """
+    data = load_json("planets")
+
+    for planet in data:
+        if planet["id"] == planet_id:
+            return planet
+
+    raise HTTPException(404, "Planet not found")
 
 
 @router.get("/{planet_id}/residents")
-async def planet_residents(planet_id: int):
-    planet = await client.fetch(f"planets/{planet_id}")
-    residents = await client.fetch_many(planet["residents"])
-
-    return {"planet": planet["name"], "residents": residents}
+def planet_residents(planet_id: int):
+    """
+    Retorna os residentes de um planeta.
+    """
+    planet = get_planet(planet_id)
+    return {"planet": planet["name"], "residents": planet["residents"]}
 
 
 @router.get("/{planet_id}/films")
-async def planet_films(planet_id: int):
-    planet = await client.fetch(f"planets/{planet_id}")
-    films = await client.fetch_many(planet["films"])
-
-    return {"planet": planet["name"], "films": films}
+def planet_films(planet_id: int):
+    """
+    Retorna os filmes relacionados a um planeta.
+    """
+    planet = get_planet(planet_id)
+    return {"planet": planet["name"], "films": planet["films"]}

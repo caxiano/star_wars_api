@@ -1,67 +1,59 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException
 
-from app.services.swapi_client import SwapiClient
+from app.services.json_store import load_json
 
 router = APIRouter()
-client = SwapiClient()
 
 
 @router.get("/")
-async def list_films(
-    title: str | None = Query(None),
-    sort: str = Query("episode_id"),
-):
-    data = await client.fetch("films")
-    results = data["results"]
+def list_films():
+    """
+    Retorna a lista de filmes.
+    """
+    data = load_json("films")
 
-    if title:
-        results = [f for f in results if title.lower() in f["title"].lower()]
+    if not data:
+        raise HTTPException(500, "Films data not available")
 
-    results.sort(key=lambda x: x.get(sort))
-
-    return {"count": len(results), "results": results}
+    return {"count": len(data), "results": data}
 
 
 @router.get("/{film_id}")
-async def get_film(film_id: int):
-    return await client.fetch(f"films/{film_id}")
+def get_film(film_id: int):
+    """
+    Retorna um filme pelo ID.
+    """
+    data = load_json("films")
+
+    for film in data:
+        if film["id"] == film_id:
+            return film
+
+    raise HTTPException(404, "Film not found")
 
 
 @router.get("/{film_id}/characters")
-async def film_characters(film_id: int):
-    film = await client.fetch(f"films/{film_id}")
-    characters = await client.fetch_many(film["characters"])
-
-    return {"film": film["title"], "characters": characters}
+def film_characters(film_id: int):
+    """
+    Retorna os personagens de um filme.
+    """
+    film = get_film(film_id)
+    return {"film": film["title"], "characters": film["characters"]}
 
 
 @router.get("/{film_id}/planets")
-async def film_planets(film_id: int):
-    film = await client.fetch(f"films/{film_id}")
-    planets = await client.fetch_many(film["planets"])
-
-    return {"film": film["title"], "planets": planets}
-
-
-@router.get("/{film_id}/species")
-async def film_species(film_id: int):
-    film = await client.fetch(f"films/{film_id}")
-    species = await client.fetch_many(film["species"])
-
-    return {"film": film["title"], "species": species}
+def film_planets(film_id: int):
+    """
+    Retorna os planetas de um filme.
+    """
+    film = get_film(film_id)
+    return {"film": film["title"], "planets": film["planets"]}
 
 
 @router.get("/{film_id}/starships")
-async def film_starships(film_id: int):
-    film = await client.fetch(f"films/{film_id}")
-    starships = await client.fetch_many(film["starships"])
-
-    return {"film": film["title"], "starships": starships}
-
-
-@router.get("/{film_id}/vehicles")
-async def film_vehicles(film_id: int):
-    film = await client.fetch(f"films/{film_id}")
-    vehicles = await client.fetch_many(film["vehicles"])
-
-    return {"film": film["title"], "vehicles": vehicles}
+def film_starships(film_id: int):
+    """
+    Retorna as espaçonaves de um filme.
+    """
+    film = get_film(film_id)
+    return {"film": film["title"], "starships": film["starships"]}

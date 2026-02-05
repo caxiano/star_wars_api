@@ -1,49 +1,50 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException
 
-from app.services.swapi_client import SwapiClient
+from app.services.json_store import load_json
 
 router = APIRouter()
-client = SwapiClient()
 
 
 @router.get("/")
-async def list_starships(
-    name: str | None = Query(None),
-    model: str | None = Query(None),
-    sort: str = Query("name"),
+def list_starships():
+    """
+    Retorna a lista de espaçonaves.
+    """
+    data = load_json("starships")
 
+    if not data:
+        raise HTTPException(500, "Starships data not available")
 
-):
-    data = await client.fetch("starships", params={"search": name} if name else None)
-    results = data["results"]
-
-    if model:
-        results = [
-            s for s in results
-            if model.lower() in s.get("model", "").lower()
-        ]
-
-    results.sort(key=lambda x: x.get(sort, ""))
-
-    return {"count": len(results), "results": results}
+    return {"count": len(data), "results": data}
 
 
 @router.get("/{starship_id}")
-async def get_starship(starship_id: int):
-    return await client.fetch(f"starships/{starship_id}")
+def get_starship(starship_id: int):
+    """
+    Retorna uma espaçonave pelo ID.
+    """
+    data = load_json("starships")
 
+    for ship in data:
+        if ship["id"] == starship_id:
+            return ship
 
-@router.get("/{starship_id}/films")
-async def starship_films(starship_id: int):
-    starship = await client.fetch(f"starships/{starship_id}")
-    films = await client.fetch_many(starship["films"])
-
-    return {"starship": starship["name"], "films": films}
+    raise HTTPException(404, "Starship not found")
 
 
 @router.get("/{starship_id}/pilots")
-async def starship_pilots(starship_id: int):
-    starship = await client.fetch(f"starships/{starship_id}")
-    pilots = await client.fetch_many(starship["pilots"])
+def starship_pilots(starship_id: int):
+    """
+    Retorna os pilotos de uma espaçonave.
+    """
+    ship = get_starship(starship_id)
+    return {"starship": ship["name"], "pilots": ship["pilots"]}
 
-    return {"starship": starship["name"], "pilots": pilots}
+
+@router.get("/{starship_id}/films")
+def starship_films(starship_id: int):
+    """
+    Retorna os filmes relacionados a uma espaçonave.
+    """
+    ship = get_starship(starship_id)
+    return {"starship": ship["name"], "films": ship["films"]}

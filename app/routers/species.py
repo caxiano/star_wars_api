@@ -1,48 +1,50 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException
 
-from app.services.swapi_client import SwapiClient
+from app.services.json_store import load_json
 
 router = APIRouter()
-client = SwapiClient()
 
 
 @router.get("/")
-async def list_species(
-    name: str | None = Query(None),
-    classification: str | None = Query(None),
-    sort: str = Query("name"),
-):
-    data = await client.fetch("species", params={"search": name} if name else None)
+def list_species():
+    """
+    Retorna a lista de espécies.
+    """
+    data = load_json("species")
 
-    results = data["results"]
+    if not data:
+        raise HTTPException(500, "Species data not available")
 
-    if classification:
-        results = [
-            s for s in results
-            if s["classification"].lower() == classification.lower()
-        ]
-
-    results.sort(key=lambda x: x.get(sort, ""))
-
-    return {"count": len(results), "results": results}
+    return {"count": len(data), "results": data}
 
 
 @router.get("/{species_id}")
-async def get_species(species_id: int):
-    return await client.fetch(f"species/{species_id}")
+def get_species(species_id: int):
+    """
+    Retorna uma espécie pelo ID.
+    """
+    data = load_json("species")
+
+    for specie in data:
+        if specie["id"] == species_id:
+            return specie
+
+    raise HTTPException(404, "Specie not found")
 
 
 @router.get("/{species_id}/people")
-async def species_people(species_id: int):
-    species = await client.fetch(f"species/{species_id}")
-    people = await client.fetch_many(species["people"])
-
-    return {"species": species["name"], "people": people}
+def species_people(species_id: int):
+    """
+    Retorna os personagens de uma espécie.
+    """
+    specie = get_species(species_id)
+    return {"species": specie["name"], "people": specie["people"]}
 
 
 @router.get("/{species_id}/films")
-async def species_films(species_id: int):
-    species = await client.fetch(f"species/{species_id}")
-    films = await client.fetch_many(species["films"])
-
-    return {"species": species["name"], "films": films}
+def species_films(species_id: int):
+    """
+    Retorna os filmes relacionados a uma espécie.
+    """
+    specie = get_species(species_id)
+    return {"species": specie["name"], "films": specie["films"]}

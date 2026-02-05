@@ -1,56 +1,59 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException
 
-from app.services.swapi_client import SwapiClient
+from app.services.json_store import load_json
 
 router = APIRouter()
-client = SwapiClient()
 
 
 @router.get("/")
-async def list_people(
-    name: str | None = Query(None),
-    sort: str = Query("name"),
-):
-    data = await client.fetch("people", params={"search": name} if name else None)
+def list_people():
+    """
+    Retorna a lista de personagens.
+    """
+    data = load_json("people")
 
-    results = data["results"]
-    results.sort(key=lambda x: x.get(sort, ""))
+    if not data:
+        raise HTTPException(500, "People data not available")
 
-    return {"count": len(results), "results": results}
+    return {"count": len(data), "results": data}
 
 
 @router.get("/{person_id}")
-async def get_person(person_id: int):
-    return await client.fetch(f"people/{person_id}")
+def get_person(person_id: int):
+    """
+    Retorna um personagem pelo ID.
+    """
+    data = load_json("people")
+
+    for person in data:
+        if person["id"] == person_id:
+            return person
+
+    raise HTTPException(404, "Person not found")
 
 
 @router.get("/{person_id}/films")
-async def person_films(person_id: int):
-    person = await client.fetch(f"people/{person_id}")
-    films = await client.fetch_many(person["films"])
-
-    return {"person": person["name"], "films": films}
-
-
-@router.get("/{person_id}/species")
-async def person_species(person_id: int):
-    person = await client.fetch(f"people/{person_id}")
-    species = await client.fetch_many(person["species"])
-
-    return {"person": person["name"], "species": species}
+def person_films(person_id: int):
+    """
+    Retorna os filmes relacionados a um personagem.
+    """
+    person = get_person(person_id)
+    return {"person": person["name"], "films": person["films"]}
 
 
 @router.get("/{person_id}/starships")
-async def person_starships(person_id: int):
-    person = await client.fetch(f"people/{person_id}")
-    starships = await client.fetch_many(person["starships"])
-
-    return {"person": person["name"], "starships": starships}
+def person_starships(person_id: int):
+    """
+    Retorna as espaçonaves relacionadas a um personagem.
+    """
+    person = get_person(person_id)
+    return {"person": person["name"], "starships": person["starships"]}
 
 
 @router.get("/{person_id}/vehicles")
-async def person_vehicles(person_id: int):
-    person = await client.fetch(f"people/{person_id}")
-    vehicles = await client.fetch_many(person["vehicles"])
-
-    return {"person": person["name"], "vehicles": vehicles}
+def person_vehicles(person_id: int):
+    """
+    Retorna os veículos relacionados a um personagem.
+    """
+    person = get_person(person_id)
+    return {"person": person["name"], "vehicles": person["vehicles"]}

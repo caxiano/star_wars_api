@@ -1,47 +1,50 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException
 
-from app.services.swapi_client import SwapiClient
+from app.services.json_store import load_json
 
 router = APIRouter()
-client = SwapiClient()
 
 
 @router.get("/")
-async def list_vehicles(
-    name: str | None = Query(None),
-    vehicle_class: str | None = Query(None),
-    sort: str = Query("name"),
-):
-    data = await client.fetch("vehicles", params={"search": name} if name else None)
-    results = data["results"]
+def list_vehicles():
+    """
+    Retorna a lista de veículos.
+    """
+    data = load_json("vehicles")
 
-    if vehicle_class:
-        results = [
-            v for v in results
-            if vehicle_class.lower() in v.get("vehicle_class", "").lower()
-        ]
+    if not data:
+        raise HTTPException(500, "Vehicles data not available")
 
-    results.sort(key=lambda x: x.get(sort, ""))
-
-    return {"count": len(results), "results": results}
+    return {"count": len(data), "results": data}
 
 
 @router.get("/{vehicle_id}")
-async def get_vehicle(vehicle_id: int):
-    return await client.fetch(f"vehicles/{vehicle_id}")
+def get_vehicle(vehicle_id: int):
+    """
+    Retorna um veículo pelo ID.
+    """
+    data = load_json("vehicles")
 
+    for vehicle in data:
+        if vehicle["id"] == vehicle_id:
+            return vehicle
 
-@router.get("/{vehicle_id}/films")
-async def vehicle_films(vehicle_id: int):
-    vehicle = await client.fetch(f"vehicles/{vehicle_id}")
-    films = await client.fetch_many(vehicle["films"])
-
-    return {"vehicle": vehicle["name"], "films": films}
+    raise HTTPException(404, "Vehicle not found")
 
 
 @router.get("/{vehicle_id}/pilots")
-async def vehicle_pilots(vehicle_id: int):
-    vehicle = await client.fetch(f"vehicles/{vehicle_id}")
-    pilots = await client.fetch_many(vehicle["pilots"])
+def vehicle_pilots(vehicle_id: int):
+    """
+    Retorna os pilotos de um veículo.
+    """
+    vehicle = get_vehicle(vehicle_id)
+    return {"vehicle": vehicle["name"], "pilots": vehicle["pilots"]}
 
-    return {"vehicle": vehicle["name"], "pilots": pilots}
+
+@router.get("/{vehicle_id}/films")
+def vehicle_films(vehicle_id: int):
+    """
+    Retorna os filmes relacionados a um veículo.
+    """
+    vehicle = get_vehicle(vehicle_id)
+    return {"vehicle": vehicle["name"], "films": vehicle["films"]}
