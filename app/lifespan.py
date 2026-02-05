@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from app.config import settings
 from app.services.bootstrap import bootstrap_data
 
 
@@ -15,6 +16,7 @@ async def lifespan(app: FastAPI):
     :yield: None
     """
     # STARTUP
-    await bootstrap_data()
+    if not settings.TESTING:
+        await bootstrap_data()
 
     yield

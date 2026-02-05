@@ -29,6 +29,42 @@ intuitiva.
 
 ---
 
+## ⚙️ Arquitetura da Solução
+
+A aplicação foi projetada com foco em **simplicidade**, **performance**
+e **boas práticas de backend**.
+
+Essa abordagem reduz a latência e evita múltiplas chamadas externas
+durante o consumo da API.
+
+### 🔄 Fluxo de Dados
+
+1.  **Startup da aplicação**
+    -   Os dados da SWAPI são ingeridos automaticamente
+    -   Todas as páginas são consumidas (sem paginação externa)
+    -   Os dados são normalizados e correlacionados
+2.  **Normalização**
+    -   URLs da SWAPI são convertidas em links internos da API
+
+    -   Relações são transformadas no formato:
+
+        ``` json
+        {
+          "Nome do Recurso": "link_da_api"
+        }
+        ```
+3.  **Persistência**
+    -   Os dados finais são armazenados localmente em arquivos JSON
+    -   Os arquivos JSON são gerados automaticamente na primeira
+        execução e reutilizados nas próximas inicializações
+    -   A API passa a operar **sem dependência da SWAPI em tempo de
+        execução**
+4.  **Execução**
+    -   Os endpoints consomem apenas os dados normalizados
+    -   Respostas rápidas e consistentes ⚡
+
+---
+
 ## 🧠 Normalização de Dados
 
 A SWAPI representa relações utilizando URLs.\
@@ -50,7 +86,7 @@ API.
 
 ``` json
 "characters": {
-  "Luke Skywalker": "http://localhost:8000/people/1"
+  "Luke Skywalker": "http://localhost:8000/api/people/1"
 }
 ```
 
@@ -73,4 +109,4 @@ Desenvolvedor Python Back-end / Full Stack
 
 ---
 
-> *"Do. Or do not. There is no try." — Yoda*
+> *"Do. Or do not. There is no try." — Yoda* 🌟
