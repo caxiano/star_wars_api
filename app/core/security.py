@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import jwt
 
@@ -8,22 +8,30 @@ from app.config import settings
 def create_access_token(
     id: str,
     email: str,
-    role: str = "user",
-    expires_minutes: int | None = None
+    role: str,
+    expires_minutes: int = 60,
 ) -> str:
-    expire = datetime.utcnow() + timedelta(
-        minutes=expires_minutes or settings.JWT_EXPIRE_MINUTES
-    )
+    """
+    Cria um token JWT assinado para autenticação do usuário.
+
+    :param id: Identificador único do usuário
+    :param email: Email do usuário autenticado
+    :param role: Papel do usuário no sistema
+    :param expires_minutes: Tempo de expiração do token em minutos
+    :return: Token JWT assinado
+    """
 
     payload = {
         "id": id,
         "email": email,
         "role": role,
-        "exp": expire
+        "exp": datetime.now(timezone.utc) + timedelta(
+            minutes=settings.JWT_EXPIRE_MINUTES or expires_minutes
+        ),
     }
 
     return jwt.encode(
         payload,
         settings.JWT_SECRET_KEY,
-        algorithm=settings.JWT_ALGORITHM
+        algorithm=settings.JWT_ALGORITHM,
     )

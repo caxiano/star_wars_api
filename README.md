@@ -6,6 +6,21 @@ Este projeto foi desenvolvido como **case técnico** para o processo seletivo de
 
 ---
 
+## Normalização de Dados
+
+Os dados provenientes da SWAPI utilizam URLs para representar relações
+entre recursos. Durante o processo de bootstrap da aplicação, todos os
+recursos são ingeridos e indexados em memória, permitindo a conversão
+dessas relações em estruturas mais legíveis para o consumidor da API,
+no formato:
+
+{ "Nome do Recurso": "link interno da API" }
+
+Essa abordagem evita chamadas adicionais à SWAPI e melhora a experiência
+de consumo da API.
+
+---
+
 ## Melhorias Futuras
 
 - Persistência de dados em SQLite ou PostgreSQL para otimizar consultas relacionais
