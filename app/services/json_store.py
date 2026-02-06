@@ -1,4 +1,5 @@
 import json
+import shutil
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -10,6 +11,13 @@ def ensure_data_dir() -> None:
     Garante que o diretório de dados exista.
     """
     DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def clear_data_dir() -> None:
+    """
+    Remove o diretório /data para forçar a recriação.
+    """
+    shutil.rmtree(DATA_DIR, ignore_errors=True)
 
 
 def get_json_path(resource: str) -> Path:

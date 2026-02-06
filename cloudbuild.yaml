@@ -1,0 +1,9 @@
+steps:
+- name: "gcr.io/cloud-builders/docker"
+  args:
+  - "build"
+  - "-t"
+  - "southamerica-east1-docker.pkg.dev/star-wars-api-486521/star-wars-api/star_wars_api:latest"
+  - "."
+images:
+- "southamerica-east1-docker.pkg.dev/star-wars-api-486521/star-wars-api/star_wars_api:latest"

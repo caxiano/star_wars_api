@@ -4,6 +4,7 @@ from fastapi import FastAPI
 
 from app.config import settings
 from app.services.bootstrap import bootstrap_data
+from app.services.json_store import clear_data_dir
 
 
 @asynccontextmanager
@@ -17,6 +18,8 @@ async def lifespan(app: FastAPI):
     """
     # STARTUP
     if not settings.TESTING:
+        if settings.FORCE_REBUILD_DATA:
+            clear_data_dir()
         await bootstrap_data()
 
     yield

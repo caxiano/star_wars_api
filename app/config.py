@@ -18,6 +18,8 @@ class Settings(BaseSettings):
 
     # Adicionar flag de teste para permitir pular operações de rede durante os testes
     TESTING: bool = False
+    # Força recriar a pasta data/ no startup
+    FORCE_REBUILD_DATA: bool = True
 
     model_config = SettingsConfigDict(
         env_file=".env",
