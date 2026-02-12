@@ -15,8 +15,8 @@ def test_people_unauthorized():
 
 
 def test_people_with_valid_token():
-    # Obter token de autenticação (ajuste o payload conforme necessário para seu endpoint de login)
-    login = client.post("/auth/login", json={})
+    # Obter token de autenticação (ajuste o payload conforme necessário para o endpoint de login)
+    login = client.post("/auth/login/", json={})
     assert login.status_code == 200
     token = login.json().get("access_token")
     assert token
