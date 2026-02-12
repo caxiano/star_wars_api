@@ -41,7 +41,7 @@ Bearer SEU_TOKEN_AQUI
     contact={
         "name": "Cassiano Shigueyuki Nishikawa",
         "email": "csnishikawa@gmail.com",
-        "url": "https://github.com/caxiano/starwars-api",
+        "url": "https://github.com/caxiano/star_wars_api",
     },
     swagger_ui_parameters={
         "docExpansion": "list",
